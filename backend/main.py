@@ -1,18 +1,35 @@
 from modules.parser import load_logs
+
 from modules.analytics_engine import (
-    count_log_levels,
-    keyword_statistics,
-    show_error_messages
+    generate_report,
+    sort_logs,
+    get_logs_by_level,
+    search_logs
 )
 
+# Load logs
 logs = load_logs()
 
-print("Total Logs:", len(logs))
+# Sort logs
+logs = sort_logs(logs)
 
-print("\nLog Statistics:")
-print(count_log_levels(logs))
+# Generate report
+generate_report(logs)
 
-print("\nKeyword Statistics:")
-print(keyword_statistics(logs))
+# Example searches
 
-show_error_messages(logs)
+print("\nERROR LOGS")
+print("----------")
+
+error_logs = get_logs_by_level(logs, "ERROR")
+
+for log in error_logs:
+    print(log)
+
+print("\nPAYMENT LOGS")
+print("------------")
+
+payment_logs = search_logs(logs, "Payment")
+
+for log in payment_logs:
+    print(log)
