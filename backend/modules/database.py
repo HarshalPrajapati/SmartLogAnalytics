@@ -1,17 +1,39 @@
 import psycopg2
 
-try:
-    connection = psycopg2.connect(
-        host="10.255.255.254",
+def get_connection():
+    return psycopg2.connect(
         database="smartloganalytics",
-        user="postgres",
-        password="admin"
+        user="harshal",
+        password="harshal2912",
+        host="localhost"
     )
 
-    print("Database Connected Successfully!")
+def insert_log(timestamp, level, message):
+    conn = get_connection()
+    cur = conn.cursor()
 
-    connection.close()
+    cur.execute(
+        """
+        INSERT INTO logs(timestamp, level, message)
+        VALUES (%s, %s, %s)
+        """,
+        (timestamp, level, message)
+    )
 
-except Exception as e:
-    print("Connection Failed:")
-    print(e)
+    conn.commit()
+
+    cur.close()
+    conn.close()
+
+def fetch_all_logs():
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute("SELECT * FROM logs")
+
+    logs = cur.fetchall()
+
+    cur.close()
+    conn.close()
+
+    return logs

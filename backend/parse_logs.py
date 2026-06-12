@@ -1,3 +1,5 @@
+from modules.database import insert_log
+
 def parse_log_line(line):
 
     parts = line.split()
@@ -21,7 +23,14 @@ with open("../logs/server.log", "r") as file:
         parsed_log = parse_log_line(line)
 
         if parsed_log is not None:
+
             logs.append(parsed_log)
+
+            insert_log(
+                parsed_log["timestamp"],
+                parsed_log["level"],
+                parsed_log["message"]
+            )
 
 
 print("\n===== LOG ANALYTICS SUMMARY =====")
@@ -54,6 +63,7 @@ for log in logs:
     if log["level"] == "ERROR":
         print(log["message"])
 
+
 payment_count = 0
 login_count = 0
 database_count = 0
@@ -77,4 +87,3 @@ print("------------------")
 print("Payment Logs:", payment_count)
 print("Login Logs:", login_count)
 print("Database Logs:", database_count)
-
