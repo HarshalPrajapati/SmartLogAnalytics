@@ -1,0 +1,12 @@
+2026-06-04 10:00:01 INFO Application Started
+2026-06-04 10:01:20 INFO User Login
+2026-06-04 10:02:15 WARNING High Memory Usage
+2026-06-04 10:03:10 ERROR Database Connection Failed
+2026-06-04 10:03:15 ERROR Payment Failed
+2026-06-04 10:04:01 INFO Application Running
+2026-06-04 10:05:00 INFO New User Registered
+2026-06-04 10:05:30 INFO Payment Started
+2026-06-04 10:05:35 ERROR Payment Gateway Timeout
+2026-06-04 10:06:00 WARNING CPU Usage High
+2026-06-04 10:06:15 ERROR Login Service Down
+2026-06-04 10:10:00 INFO New User Login
