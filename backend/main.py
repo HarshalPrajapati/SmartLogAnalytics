@@ -1,35 +1,19 @@
-from modules.parser import load_logs
+from modules.database_report import generate_report
+from modules.csv_export import export_daily_report # type: ignore
 
-from modules.analytics_engine import (
-    generate_report,
-    sort_logs,
-    get_logs_by_level,
-    search_logs
-)
 
-# Load logs
-logs = load_logs()
+def main():
 
-# Sort logs
-logs = sort_logs(logs)
+    print("\nStarting SmartLogAnalytics...\n")
 
-# Generate report
-generate_report(logs)
+    generate_report()
 
-# Example searches
+    print("\nGenerating CSV Report...\n")
 
-print("\nERROR LOGS")
-print("----------")
+    export_daily_report()
 
-error_logs = get_logs_by_level(logs, "ERROR")
+    print("\nSmartLogAnalytics Completed Successfully!")
 
-for log in error_logs:
-    print(log)
 
-print("\nPAYMENT LOGS")
-print("------------")
-
-payment_logs = search_logs(logs, "Payment")
-
-for log in payment_logs:
-    print(log)
+if __name__ == "__main__":
+    main()
