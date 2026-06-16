@@ -9,7 +9,9 @@ from modules.sql_analytics import (
     count_logins,
     count_payments,
     count_database_events,
-    get_top_errors
+    get_top_errors,
+    get_most_common_level,
+    get_most_active_event
 )
 
 
@@ -31,6 +33,15 @@ def export_report_csv(filename):
     if top_errors:
         data.append(["Top Error", top_errors[0][0]])
         data.append(["Top Error Count", top_errors[0][1]])
+
+    most_common_level = get_most_common_level()
+    most_active_event = get_most_active_event()
+
+    if most_common_level:
+        data.append(["Most Common Level", most_common_level[0]])
+
+    if most_active_event:
+        data.append(["Most Active Event", most_active_event[0]])
 
     with open(filename, "w", newline="") as file:
 
