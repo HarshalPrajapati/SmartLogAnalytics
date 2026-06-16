@@ -8,7 +8,8 @@ from modules.sql_analytics import (
     count_info,
     count_logins,
     count_payments,
-    count_database_events
+    count_database_events,
+    get_top_errors
 )
 
 
@@ -25,6 +26,12 @@ def export_report_csv(filename):
         ["Database Events", count_database_events()]
     ]
 
+    top_errors = get_top_errors(1)
+
+    if top_errors:
+        data.append(["Top Error", top_errors[0][0]])
+        data.append(["Top Error Count", top_errors[0][1]])
+
     with open(filename, "w", newline="") as file:
 
         writer = csv.writer(file)
@@ -40,3 +47,5 @@ def export_daily_report():
     filename = f"../reports/report_{timestamp}.csv"
 
     export_report_csv(filename)
+
+    

@@ -179,4 +179,51 @@ def get_error_messages():
     cur.close()
     conn.close()
 
-    return errors
+    return errors 
+
+def get_top_messages(limit=5):
+
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute(
+        """
+        SELECT message, COUNT(*)
+        FROM logs
+        GROUP BY message
+        ORDER BY COUNT(*) DESC
+        LIMIT %s
+        """,
+        (limit,)
+    )
+
+    results = cur.fetchall()
+
+    cur.close()
+    conn.close()
+
+    return results
+
+def get_top_errors(limit=5):
+
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute(
+        """
+        SELECT message, COUNT(*)
+        FROM logs
+        WHERE level = 'ERROR'
+        GROUP BY message
+        ORDER BY COUNT(*) DESC
+        LIMIT %s
+        """,
+        (limit,)
+    )
+
+    results = cur.fetchall()
+
+    cur.close()
+    conn.close()
+
+    return results
