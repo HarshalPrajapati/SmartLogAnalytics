@@ -271,3 +271,48 @@ def get_most_active_event():
     conn.close()
 
     return result
+
+def get_top_5_errors():
+
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute(
+        """
+        SELECT message, COUNT(*)
+        FROM logs
+        WHERE level = 'ERROR'
+        GROUP BY message
+        ORDER BY COUNT(*) DESC
+        LIMIT 5
+        """
+    )
+
+    results = cur.fetchall()
+
+    cur.close()
+    conn.close()
+
+    return results
+
+def get_top_5_events():
+
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute(
+        """
+        SELECT message, COUNT(*)
+        FROM logs
+        GROUP BY message
+        ORDER BY COUNT(*) DESC
+        LIMIT 5
+        """
+    )
+
+    results = cur.fetchall()
+
+    cur.close()
+    conn.close()
+
+    return results
