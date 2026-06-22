@@ -17,6 +17,10 @@
             text-align: center;
         }
 
+        h2 {
+            text-align: center;
+        }
+
         .navbar {
             text-align: center;
             margin-bottom: 30px;
@@ -45,10 +49,6 @@
             text-align: center;
         }
 
-        .card h3 {
-            margin-bottom: 15px;
-        }
-
         .value {
             font-size: 28px;
             font-weight: bold;
@@ -70,6 +70,15 @@
             margin-top: 50px;
             text-align: center;
             color: gray;
+        }
+
+        .chart-card {
+            width: 700px;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
         }
 
     </style>
@@ -149,16 +158,47 @@
 
         <div class="card">
             <h3>Most Active Event</h3>
-            <div class="value" style="font-size:18px;">
+            <div style="font-size:18px; font-weight:bold;">
                 {{ data.most_active_event }}
             </div>
         </div>
 
     </div>
 
+    <hr>
+
+    <h2>Log Analytics Charts</h2>
+
+    <div class="container">
+
+        <div class="card chart-card">
+
+            <h3>Log Level Distribution</h3>
+
+            <img
+                src="{{ url_for('static', filename='log_level_pie.png') }}"
+                alt="Pie Chart">
+
+        </div>
+
+        <div class="card chart-card">
+
+            <h3>Log Level Counts</h3>
+
+            <img
+                src="{{ url_for('static', filename='log_level_bar.png') }}"
+                alt="Bar Chart">
+
+        </div>
+
+    </div>
+
     <footer>
+
         <hr>
+
         <p>SmartLogAnalytics v1.0</p>
+
     </footer>
 
 </body>
