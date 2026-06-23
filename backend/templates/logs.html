@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Recent Logs</title>
+
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+        }
+
+        th {
+            background-color: #f4f4f4;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <h1>Recent Logs</h1>
+
+    <table>
+
+        <tr>
+            <th>Timestamp</th>
+            <th>Level</th>
+            <th>Message</th>
+        </tr>
+
+        {% for log in logs %}
+
+        <tr>
+            <td>{{ log[0] }}</td>
+            <td>{{ log[1] }}</td>
+            <td>{{ log[2] }}</td>
+        </tr>
+
+        {% endfor %}
+
+    </table>
+
+    <div style="margin-bottom:20px;">
+
+        <a href="/logs">All Logs</a> |
+
+        <a href="/logs/INFO">INFO</a> |
+
+        <a href="/logs/WARNING">WARNING</a> |
+
+        <a href="/logs/ERROR">ERROR</a>
+
+    </div>
+
+</body>
+
+</html>

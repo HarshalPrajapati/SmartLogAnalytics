@@ -6,7 +6,6 @@
     <title>SmartLogAnalytics Dashboard</title>
 
     <style>
-
         body {
             font-family: Arial, sans-serif;
             margin: 40px;
@@ -80,7 +79,6 @@
             max-width: 100%;
             height: auto;
         }
-
     </style>
 
 </head>
@@ -93,6 +91,25 @@
         <a href="/">Dashboard</a>
         |
         <a href="/dashboard">JSON API</a>
+
+        <a href="/logs">Log Viewer</a>
+
+        <a href="/search">Search</a>
+
+    </div>
+
+    <div style="text-align:center; margin-bottom:30px;">
+
+        <form action="/search" method="GET">
+
+            <input type="text" name="q" placeholder="Search logs..." style="padding:10px; width:300px;">
+
+            <button type="submit" style="padding:10px;">
+                Search
+            </button>
+
+        </form>
+
     </div>
 
     <div class="container">
@@ -167,6 +184,48 @@
 
     <hr>
 
+    <h2 style="text-align:center;">
+        Recent Errors
+    </h2>
+
+    <div class="container">
+
+        <div class="card" style="width:700px;">
+
+            {% if data.recent_errors %}
+
+            <ul style="text-align:left;">
+
+                {% for error in data.recent_errors %}
+
+                <li>
+
+                    <strong>{{ error[0] }}</strong>
+
+                    <br>
+
+                    {{ error[1] }}
+
+                </li>
+
+                <br>
+
+                {% endfor %}
+
+            </ul>
+
+            {% else %}
+
+            <p>No recent errors found.</p>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+    <hr>
+
     <h2>Log Analytics Charts</h2>
 
     <div class="container">
@@ -175,9 +234,7 @@
 
             <h3>Log Level Distribution</h3>
 
-            <img
-                src="{{ url_for('static', filename='log_level_pie.png') }}"
-                alt="Pie Chart">
+            <img src="{{ url_for('static', filename='log_level_pie.png') }}" alt="Pie Chart">
 
         </div>
 
@@ -185,9 +242,7 @@
 
             <h3>Log Level Counts</h3>
 
-            <img
-                src="{{ url_for('static', filename='log_level_bar.png') }}"
-                alt="Bar Chart">
+            <img src="{{ url_for('static', filename='log_level_bar.png') }}" alt="Bar Chart">
 
         </div>
 

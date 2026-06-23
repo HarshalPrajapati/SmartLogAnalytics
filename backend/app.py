@@ -1,10 +1,10 @@
 from flask import Flask, render_template
-
+from modules.log_viewer import get_recent_logs
 from modules.dashboard_data import get_dashboard_data
-from modules.chart_generator import (
-    generate_pie_chart,
-    generate_bar_chart
-)
+from modules.chart_generator import (generate_pie_chart,generate_bar_chart)
+from modules.log_viewer import (get_recent_logs,get_logs_by_level)
+from flask import (Flask,render_template,request)
+from modules.log_viewer import (get_recent_logs,get_logs_by_level,search_logs)
 
 app = Flask(__name__)
 
@@ -28,6 +28,45 @@ def dashboard():
 
     return get_dashboard_data()
 
+@app.route("/logs")
+def logs():
+
+    log_data = get_recent_logs()
+
+    return render_template(
+        "logs.html",
+        logs=log_data
+    )
+
+@app.route("/logs/<level>")
+def logs_by_level(level):
+
+    log_data = get_logs_by_level(level.upper())
+
+    return render_template(
+        "logs.html",
+        logs=log_data
+    )
+
+@app.route("/search")
+def search():
+
+    keyword = request.args.get(
+        "q",
+        ""
+    )
+
+    results = []
+
+    if keyword:
+        results = search_logs(keyword)
+
+    return render_template(
+        "search.html",
+        logs=results,
+        keyword=keyword
+    )
 
 if __name__ == "__main__":
     app.run(debug=True)
+
