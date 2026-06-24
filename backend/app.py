@@ -5,6 +5,7 @@ from modules.chart_generator import (generate_pie_chart,generate_bar_chart)
 from modules.log_viewer import (get_recent_logs,get_logs_by_level)
 from flask import (Flask,render_template,request)
 from modules.log_viewer import (get_recent_logs,get_logs_by_level,search_logs)
+from flask import (Flask,render_template,request,jsonify)
 
 app = Flask(__name__)
 
@@ -67,6 +68,34 @@ def search():
         keyword=keyword
     )
 
+@app.route("/api/stats")
+def api_stats():
+
+    data = get_dashboard_data()
+
+    return jsonify({
+        "total_logs": data["total_logs"],
+        "error_logs": data["error_logs"],
+        "warning_logs": data["warning_logs"],
+        "info_logs": data["info_logs"],
+        "error_rate": data["error_rate"],
+        "system_health": data["system_health"]
+    })
+
+@app.route("/api/errors")
+def api_errors():
+
+    data = get_dashboard_data()
+
+    return jsonify(data["top_errors"])
+
+@app.route("/api/activity")
+def api_activity():
+
+    data = get_dashboard_data()
+
+    return jsonify(data["recent_activity"])
+
+
 if __name__ == "__main__":
     app.run(debug=True)
-

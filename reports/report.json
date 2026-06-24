@@ -1,0 +1,10 @@
+{
+    "total_logs": 12,
+    "error_logs": 4,
+    "warning_logs": 2,
+    "info_logs": 6,
+    "error_rate": 33.33,
+    "most_common_level": "INFO",
+    "most_active_event": "Database Connection Failed",
+    "system_health": "CRITICAL"
+}

@@ -7,6 +7,10 @@ from modules.sql_analytics import (
     get_most_active_event
 )
 from modules.log_viewer import get_recent_errors
+from modules.dashboard_widgets import (
+    get_top_errors,
+    get_recent_activity
+)
 
 def get_dashboard_data():
 
@@ -38,7 +42,9 @@ def get_dashboard_data():
             if error_rate > 10
             else "HEALTHY"
         ),
-        "recent_errors": get_recent_errors()
+        "recent_errors": get_recent_errors(),
+        "top_errors": get_top_errors(),
+        "recent_activity": get_recent_activity()
     }
 
     return data

@@ -88,14 +88,12 @@
     <h1>SmartLogAnalytics Dashboard</h1>
 
     <div class="navbar">
-        <a href="/">Dashboard</a>
-        |
-        <a href="/dashboard">JSON API</a>
-
-        <a href="/logs">Log Viewer</a>
-
-        <a href="/search">Search</a>
-
+        <a href="/">Dashboard</a> |
+        <a href="/logs">Logs</a> |
+        <a href="/search">Search</a> |
+        <a href="/api/stats">Stats API</a> |
+        <a href="/api/errors">Errors API</a> |
+        <a href="/api/activity">Activity API</a>
     </div>
 
     <div style="text-align:center; margin-bottom:30px;">
@@ -217,6 +215,85 @@
             {% else %}
 
             <p>No recent errors found.</p>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+    <hr>
+
+    <h2 style="text-align:center;">
+        Top Errors
+    </h2>
+
+    <div class="container">
+
+        <div class="card" style="width:700px;">
+
+            {% if data.top_errors %}
+
+            <ul style="text-align:left;">
+
+                {% for error in data.top_errors %}
+
+                <li>
+                    {{ error[0] }}
+                    ({{ error[1] }} occurrences)
+                </li>
+
+                {% endfor %}
+
+            </ul>
+
+            {% else %}
+
+            <p>No errors found.</p>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+    <hr>
+
+    <h2 style="text-align:center;">
+        Recent Activity
+    </h2>
+
+    <div class="container">
+
+        <div class="card" style="width:900px;">
+
+            {% if data.recent_activity %}
+
+            <ul style="text-align:left;">
+
+                {% for activity in data.recent_activity %}
+
+                <li>
+
+                    <strong>{{ activity[0] }}</strong>
+
+                    -
+                    {{ activity[1] }}
+
+                    -
+                    {{ activity[2] }}
+
+                </li>
+
+                <br>
+
+                {% endfor %}
+
+            </ul>
+
+            {% else %}
+
+            <p>No activity found.</p>
 
             {% endif %}
 
