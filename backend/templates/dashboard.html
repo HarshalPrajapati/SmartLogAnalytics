@@ -1,108 +1,50 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
 
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>SmartLogAnalytics Dashboard</title>
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 40px;
-            background-color: #f4f4f4;
-        }
-
-        h1 {
-            text-align: center;
-        }
-
-        h2 {
-            text-align: center;
-        }
-
-        .navbar {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .navbar a {
-            text-decoration: none;
-            margin: 0 10px;
-            font-weight: bold;
-            color: #333;
-        }
-
-        .container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            justify-content: center;
-        }
-
-        .card {
-            background: white;
-            padding: 20px;
-            width: 250px;
-            border-radius: 10px;
-            box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.2);
-            text-align: center;
-        }
-
-        .value {
-            font-size: 28px;
-            font-weight: bold;
-        }
-
-        .healthy {
-            color: green;
-        }
-
-        .warning {
-            color: orange;
-        }
-
-        .critical {
-            color: red;
-        }
-
-        footer {
-            margin-top: 50px;
-            text-align: center;
-            color: gray;
-        }
-
-        .chart-card {
-            width: 700px;
-        }
-
-        img {
-            max-width: 100%;
-            height: auto;
-        }
-    </style>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
 
 </head>
 
 <body>
 
-    <h1>SmartLogAnalytics Dashboard</h1>
+    <div class="header">
 
-    <div class="navbar">
-        <a href="/">Dashboard</a> |
-        <a href="/logs">Logs</a> |
-        <a href="/search">Search</a> |
-        <a href="/api/stats">Stats API</a> |
-        <a href="/api/errors">Errors API</a> |
-        <a href="/api/activity">Activity API</a>
+        <h1>📊 SmartLogAnalytics Dashboard</h1>
+
+        <p>Real-Time Log Monitoring & Analytics</p>
+
     </div>
 
-    <div style="text-align:center; margin-bottom:30px;">
+    <div class="navbar">
+
+        <a href="/">Dashboard</a>
+        <a href="/logs">Logs</a>
+        <a href="/search">Search</a>
+        <a href="/api/stats">Stats API</a>
+        <a href="/api/errors">Errors API</a>
+        <a href="/api/activity">Activity API</a>
+
+    </div>
+
+    <div class="search-box">
 
         <form action="/search" method="GET">
 
-            <input type="text" name="q" placeholder="Search logs..." style="padding:10px; width:300px;">
+            <input
+                type="text"
+                name="q"
+                placeholder="Search logs...">
 
-            <button type="submit" style="padding:10px;">
+            <button type="submit">
                 Search
             </button>
 
@@ -112,224 +54,187 @@
 
     <div class="container">
 
-        <div class="card">
+        <div class="card info-card">
             <h3>Total Logs</h3>
-            <div class="value">
-                {{ data.total_logs }}
-            </div>
+            <div class="value">{{ data.total_logs }}</div>
         </div>
 
-        <div class="card">
+        <div class="card error-card">
             <h3>Error Logs</h3>
-            <div class="value">
-                {{ data.error_logs }}
-            </div>
+            <div class="value">{{ data.error_logs }}</div>
         </div>
 
-        <div class="card">
+        <div class="card warning-card">
             <h3>Warning Logs</h3>
-            <div class="value">
-                {{ data.warning_logs }}
-            </div>
+            <div class="value">{{ data.warning_logs }}</div>
         </div>
 
-        <div class="card">
+        <div class="card success-card">
             <h3>Info Logs</h3>
-            <div class="value">
-                {{ data.info_logs }}
-            </div>
+            <div class="value">{{ data.info_logs }}</div>
         </div>
 
-        <div class="card">
+        <div class="card info-card">
             <h3>Error Rate</h3>
-            <div class="value">
-                {{ data.error_rate }}%
-            </div>
+            <div class="value">{{ data.error_rate }}%</div>
         </div>
 
         <div class="card">
+
             <h3>System Health</h3>
 
-            <div class="value
-                {% if data.system_health == 'HEALTHY' %}
-                    healthy
-                {% elif data.system_health == 'WARNING' %}
-                    warning
-                {% else %}
-                    critical
-                {% endif %}
-            ">
-                {{ data.system_health }}
-            </div>
+            {% if data.system_health == "HEALTHY" %}
+                <div class="value healthy">🟢 HEALTHY</div>
+
+            {% elif data.system_health == "WARNING" %}
+                <div class="value warning">🟡 WARNING</div>
+
+            {% else %}
+                <div class="value critical">🔴 CRITICAL</div>
+
+            {% endif %}
 
         </div>
 
         <div class="card">
             <h3>Most Common Level</h3>
-            <div class="value">
-                {{ data.most_common_level }}
-            </div>
+            <div class="value">{{ data.most_common_level }}</div>
         </div>
 
         <div class="card">
             <h3>Most Active Event</h3>
-            <div style="font-size:18px; font-weight:bold;">
+            <div class="small-value">
                 {{ data.most_active_event }}
             </div>
         </div>
 
     </div>
 
-    <hr>
+    <section>
 
-    <h2 style="text-align:center;">
-        Recent Errors
-    </h2>
+        <h2>Recent Errors</h2>
 
-    <div class="container">
+        <div class="wide-card">
 
-        <div class="card" style="width:700px;">
-
-            {% if data.recent_errors %}
-
-            <ul style="text-align:left;">
+            <ul>
 
                 {% for error in data.recent_errors %}
 
-                <li>
+                    <li>
 
-                    <strong>{{ error[0] }}</strong>
+                        <strong>{{ error[0] }}</strong>
 
-                    <br>
+                        <br>
 
-                    {{ error[1] }}
+                        {{ error[1] }}
 
-                </li>
-
-                <br>
+                    </li>
 
                 {% endfor %}
 
             </ul>
 
-            {% else %}
-
-            <p>No recent errors found.</p>
-
-            {% endif %}
-
         </div>
 
-    </div>
+    </section>
 
-    <hr>
+    <section>
 
-    <h2 style="text-align:center;">
-        Top Errors
-    </h2>
+        <h2>Top Errors</h2>
 
-    <div class="container">
+        <div class="wide-card">
 
-        <div class="card" style="width:700px;">
-
-            {% if data.top_errors %}
-
-            <ul style="text-align:left;">
+            <ul>
 
                 {% for error in data.top_errors %}
 
-                <li>
-                    {{ error[0] }}
-                    ({{ error[1] }} occurrences)
-                </li>
+                    <li>
+
+                        {{ error[0] }}
+
+                        <strong>({{ error[1] }})</strong>
+
+                    </li>
 
                 {% endfor %}
 
             </ul>
 
-            {% else %}
-
-            <p>No errors found.</p>
-
-            {% endif %}
-
         </div>
 
-    </div>
+    </section>
 
-    <hr>
+    <section>
 
-    <h2 style="text-align:center;">
-        Recent Activity
-    </h2>
+        <h2>Recent Activity</h2>
 
-    <div class="container">
+        <div class="wide-card">
 
-        <div class="card" style="width:900px;">
+            <table>
 
-            {% if data.recent_activity %}
+                <tr>
 
-            <ul style="text-align:left;">
+                    <th>Timestamp</th>
+                    <th>Level</th>
+                    <th>Message</th>
+
+                </tr>
 
                 {% for activity in data.recent_activity %}
 
-                <li>
+                <tr>
 
-                    <strong>{{ activity[0] }}</strong>
+                    <td>{{ activity[0] }}</td>
 
-                    -
-                    {{ activity[1] }}
+                    <td>{{ activity[1] }}</td>
 
-                    -
-                    {{ activity[2] }}
+                    <td>{{ activity[2] }}</td>
 
-                </li>
-
-                <br>
+                </tr>
 
                 {% endfor %}
 
-            </ul>
-
-            {% else %}
-
-            <p>No activity found.</p>
-
-            {% endif %}
+            </table>
 
         </div>
 
-    </div>
+    </section>
 
-    <hr>
+    <section>
 
-    <h2>Log Analytics Charts</h2>
+        <h2>Analytics Charts</h2>
 
-    <div class="container">
+        <div class="chart-container">
 
-        <div class="card chart-card">
+            <div class="chart-card">
 
-            <h3>Log Level Distribution</h3>
+                <h3>Log Distribution</h3>
 
-            <img src="{{ url_for('static', filename='log_level_pie.png') }}" alt="Pie Chart">
+                <img
+                    src="{{ url_for('static', filename='log_level_pie.png') }}"
+                    alt="Pie Chart">
+
+            </div>
+
+            <div class="chart-card">
+
+                <h3>Log Levels</h3>
+
+                <img
+                    src="{{ url_for('static', filename='log_level_bar.png') }}"
+                    alt="Bar Chart">
+
+            </div>
 
         </div>
 
-        <div class="card chart-card">
-
-            <h3>Log Level Counts</h3>
-
-            <img src="{{ url_for('static', filename='log_level_bar.png') }}" alt="Bar Chart">
-
-        </div>
-
-    </div>
+    </section>
 
     <footer>
 
         <hr>
 
-        <p>SmartLogAnalytics v1.0</p>
+        SmartLogAnalytics v1.0
 
     </footer>
 

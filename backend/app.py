@@ -87,15 +87,31 @@ def api_errors():
 
     data = get_dashboard_data()
 
-    return jsonify(data["top_errors"])
+    errors = []
+
+    for message, count in data["top_errors"]:
+        errors.append({
+            "message": message,
+            "count": count
+        })
+
+    return jsonify(errors)
 
 @app.route("/api/activity")
 def api_activity():
 
     data = get_dashboard_data()
 
-    return jsonify(data["recent_activity"])
+    activity = []
 
+    for timestamp, level, message in data["recent_activity"]:
+        activity.append({
+            "timestamp": timestamp,
+            "level": level,
+            "message": message
+        })
+
+    return jsonify(activity)
 
 if __name__ == "__main__":
     app.run(debug=True)
