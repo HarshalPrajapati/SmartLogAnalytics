@@ -27,7 +27,7 @@ def generate_pie_chart():
 
     plt.title("Log Level Distribution")
 
-    plt.savefig("static/log_level_pie.png")
+    plt.savefig("static/images/log_level_pie.png")
 
     plt.close()
 
@@ -52,6 +52,6 @@ def generate_bar_chart():
 
     plt.ylabel("Count")
 
-    plt.savefig("static/log_level_bar.png")
+    plt.savefig("static/images/log_level_bar.png")
 
     plt.close()
