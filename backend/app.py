@@ -13,8 +13,8 @@ app = Flask(__name__)
 @app.route("/")
 def home():
 
-    generate_pie_chart()
-    generate_bar_chart()
+    # generate_pie_chart()
+    # generate_bar_chart()
 
     data = get_dashboard_data()
 
@@ -112,6 +112,27 @@ def api_activity():
         })
 
     return jsonify(activity)
+
+@app.route("/api/chart-data")
+def chart_data():
+
+    data = get_dashboard_data()
+
+    return jsonify({
+
+        "labels": [
+            "INFO",
+            "WARNING",
+            "ERROR"
+        ],
+
+        "counts": [
+            data["info_logs"],
+            data["warning_logs"],
+            data["error_logs"]
+        ]
+
+    })
 
 if __name__ == "__main__":
     app.run(debug=True)
