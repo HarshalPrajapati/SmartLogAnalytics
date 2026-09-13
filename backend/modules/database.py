@@ -1,14 +1,24 @@
+import os
+
 import psycopg2
+from dotenv import load_dotenv
+
+
+load_dotenv()
+
 
 def get_connection():
+
     return psycopg2.connect(
-        database="smartloganalytics",
-        user="harshal",
-        password="harshal2912",
-        host="localhost"
+        database=os.getenv("DB_NAME"),
+        user=os.getenv("DB_USER"),
+        password=os.getenv("DB_PASSWORD"),
+        host=os.getenv("DB_HOST")
     )
 
+
 def insert_log(timestamp, level, message):
+
     conn = get_connection()
     cur = conn.cursor()
 
@@ -25,7 +35,9 @@ def insert_log(timestamp, level, message):
     cur.close()
     conn.close()
 
+
 def fetch_all_logs():
+
     conn = get_connection()
     cur = conn.cursor()
 
