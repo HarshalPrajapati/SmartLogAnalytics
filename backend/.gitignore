@@ -2,3 +2,5 @@
 __pycache__/
 *.pyc
 .env
+quarantine/
+quality_reports/
