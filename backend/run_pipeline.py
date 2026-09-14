@@ -8,6 +8,10 @@ from etl.data_quality import (
 )
 from etl.quarantine import quarantine_logs
 from etl.load import load_logs
+from modules.minio_storage import (
+    upload_json,
+    get_date_partition
+)
 
 
 def run_pipeline():
@@ -106,8 +110,23 @@ def run_pipeline():
     # 6. LOAD VALID RECORDS
     # --------------------------------------------------
 
+    print("\n[6] Uploading processed data to MinIO...")
+
+    if valid_logs:
+
+        partition = get_date_partition(
+            valid_logs[0]["timestamp"]
+        )
+
+        upload_json(
+            valid_logs,
+            f"processed/{partition}/logs.json"
+    )
+
+    print("Processed data uploaded to MinIO")
+
     print(
-        "\n[6] Loading valid records..."
+        "\n[7] Loading valid records..."
     )
 
     inserted = load_logs(valid_logs)
