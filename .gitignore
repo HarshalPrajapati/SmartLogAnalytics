@@ -1,4 +1,27 @@
+# Python virtual environments
 .venv/
+airflow_venv/
+
+# Python cache
 __pycache__/
 *.pyc
-reports/*.csv
+
+# Environment / secrets
+.env
+*.env
+
+# Generated data
+quarantine/
+quality_reports/
+
+# Logs
+*.log
+
+# Airflow generated files
+airflow/logs/
+airflow/*.db
+airflow/airflow.cfg
+
+# OS
+.DS_Store
+reports/

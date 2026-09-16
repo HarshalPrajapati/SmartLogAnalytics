@@ -1,0 +1,10 @@
+.venv/
+airflow_venv/
+airflow/
+.git/
+.gitignore
+__pycache__/
+*.pyc
+*.log
+quarantine/
+quality_reports/

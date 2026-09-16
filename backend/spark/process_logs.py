@@ -2,15 +2,26 @@ import os
 from datetime import datetime
 
 from dotenv import load_dotenv
+
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, count, lit
 
+from pyspark.sql.types import (
+    IntegerType,
+    StringType,
+    StructField,
+    StructType,
+    TimestampType,
+    DecimalType
+)
 
-# Load environment variables
 load_dotenv()
 
 
-# MinIO configuration
+# --------------------------------------------------
+# Configuration
+# --------------------------------------------------
+
 MINIO_ENDPOINT = os.getenv(
     "MINIO_ENDPOINT"
 )
@@ -28,18 +39,53 @@ BUCKET = os.getenv(
 )
 
 
+DB_HOST = os.getenv(
+    "DB_HOST",
+    "localhost"
+)
+
+DB_PORT = os.getenv(
+    "DB_PORT",
+    "5432"
+)
+
+DB_NAME = os.getenv(
+    "DB_NAME"
+)
+
+DB_USER = os.getenv(
+    "DB_USER"
+)
+
+DB_PASSWORD = os.getenv(
+    "DB_PASSWORD"
+)
+
+
+# --------------------------------------------------
+# Spark Session
+# --------------------------------------------------
+
 def create_spark_session():
 
     return (
         SparkSession.builder
-        .appName("SmartLogAnalytics")
+
+        .appName(
+            "SmartLogAnalytics"
+        )
+
         .master("local[*]")
 
         .config(
             "spark.jars.packages",
-            "org.apache.hadoop:hadoop-aws:3.5.0"
+            ",".join([
+                "org.apache.hadoop:hadoop-aws:3.5.0",
+                "org.postgresql:postgresql:42.7.7"
+            ])
         )
 
+        # MinIO / S3A
         .config(
             "spark.hadoop.fs.s3a.endpoint",
             f"http://{MINIO_ENDPOINT}"
@@ -74,6 +120,10 @@ def create_spark_session():
     )
 
 
+# --------------------------------------------------
+# Dynamic MinIO processed path
+# --------------------------------------------------
+
 def get_processed_path():
 
     log_file = "../logs/server.log"
@@ -84,8 +134,10 @@ def get_processed_path():
     parts = first_line.split()
 
     if len(parts) < 2:
+
         raise ValueError(
-            "Unable to determine event date from log file"
+            "Unable to determine event date "
+            "from log file"
         )
 
     timestamp = (
@@ -111,6 +163,10 @@ def get_processed_path():
     )
 
 
+# --------------------------------------------------
+# Analytics path
+# --------------------------------------------------
+
 def get_analytics_path():
 
     return (
@@ -118,6 +174,184 @@ def get_analytics_path():
         "analytics/log_level_counts"
     )
 
+
+# --------------------------------------------------
+# PostgreSQL JDBC configuration
+# --------------------------------------------------
+
+def get_postgres_url():
+
+    return (
+        f"jdbc:postgresql://"
+        f"{DB_HOST}:{DB_PORT}/"
+        f"{DB_NAME}"
+    )
+
+
+# --------------------------------------------------
+# Load log events into warehouse
+# --------------------------------------------------
+
+def load_log_events(spark,df):
+
+    print(
+        "\n[10] Loading log events into "
+        "PostgreSQL warehouse..."
+    )
+
+    warehouse_df = (
+        df
+        .withColumn(
+            "event_date",
+            col("timestamp").cast("date")
+        )
+        .withColumn(
+            "timestamp",
+            col("timestamp").cast("timestamp")
+        )
+        .select(
+            "timestamp",
+            "level",
+            "message",
+            "event_date"
+        )
+        .dropDuplicates(
+            ["timestamp", "level", "message"]
+        )
+    )
+
+    print(
+        f"Records prepared for warehouse: "
+        f"{warehouse_df.count()}"
+    )
+
+    warehouse_df.show(
+        truncate=False
+    )
+
+    jdbc_url = get_postgres_url()
+
+    properties = {
+        "user": DB_USER,
+        "password": DB_PASSWORD,
+        "driver": "org.postgresql.Driver"
+    }
+
+    # Read existing warehouse records
+    existing_df = (
+        spark.read
+        .jdbc(
+            jdbc_url,
+            "warehouse.log_events",
+            properties=properties
+        )
+        .select(
+            "timestamp",
+            "level",
+            "message"
+        )
+    )
+
+    # Keep only records that are not already
+    # present in the warehouse
+    new_records_df = (
+        warehouse_df.alias("new")
+        .join(
+            existing_df.alias("existing"),
+            (
+                (col("new.timestamp") == col("existing.timestamp"))
+                &
+                (col("new.level") == col("existing.level"))
+                &
+                (col("new.message") == col("existing.message"))
+            ),
+            "left_anti"
+        )
+    )
+
+    new_count = new_records_df.count()
+
+    print(
+        f"New records to load: {new_count}"
+    )
+
+    if new_count > 0:
+
+        (
+            new_records_df
+            .write
+            .mode("append")
+            .jdbc(
+                jdbc_url,
+                "warehouse.log_events",
+                properties=properties
+            )
+        )
+
+        print(
+            "\nNew log events successfully "
+            "loaded into warehouse.log_events"
+        )
+
+    else:
+
+        print(
+            "\nNo new log events to load."
+        )
+
+
+# --------------------------------------------------
+# Load log level summary into warehouse
+# --------------------------------------------------
+
+def load_log_level_summary(
+    analytics_df
+):
+
+    print(
+        "\n[11] Loading log-level summary "
+        "into PostgreSQL warehouse..."
+    )
+
+    summary_df = (
+        analytics_df
+        .select(
+            col("level"),
+            col("log_count"),
+            col("percentage")
+        )
+    )
+
+    summary_df.show()
+
+    jdbc_url = get_postgres_url()
+
+    properties = {
+        "user": DB_USER,
+        "password": DB_PASSWORD,
+        "driver": "org.postgresql.Driver"
+    }
+
+    (
+        summary_df
+        .write
+        .mode("overwrite")
+        .jdbc(
+            jdbc_url,
+            "warehouse.log_level_summary",
+            properties=properties
+        )
+    )
+
+    print(
+        "\nLog-level summary successfully "
+        "loaded into warehouse.log_level_summary"
+    )
+
+
+# --------------------------------------------------
+# Main
+# --------------------------------------------------
 
 def main():
 
@@ -150,7 +384,7 @@ def main():
     )
 
     # --------------------------------------------------
-    # 2. Display schema
+    # 2. Schema
     # --------------------------------------------------
 
     print("\n[2] Schema:")
@@ -158,7 +392,7 @@ def main():
     df.printSchema()
 
     # --------------------------------------------------
-    # 3. Count logs by level
+    # 3. Logs by level
     # --------------------------------------------------
 
     print("\n[3] Logs by Level:")
@@ -176,7 +410,7 @@ def main():
     level_counts.show()
 
     # --------------------------------------------------
-    # 4. Display ERROR logs
+    # 4. Error logs
     # --------------------------------------------------
 
     print("\n[4] Error Logs:")
@@ -190,7 +424,7 @@ def main():
     )
 
     # --------------------------------------------------
-    # 5. Calculate error rate
+    # 5. Error rate
     # --------------------------------------------------
 
     print("\n[5] Error Rate:")
@@ -200,7 +434,8 @@ def main():
     if total_logs > 0:
 
         error_rate = (
-            total_errors / total_logs
+            total_errors
+            / total_logs
         ) * 100
 
         error_rate = round(
@@ -225,7 +460,7 @@ def main():
     )
 
     # --------------------------------------------------
-    # 6. Create analytics dataset
+    # 6. Analytics dataset
     # --------------------------------------------------
 
     print(
@@ -235,14 +470,16 @@ def main():
     analytics_df = (
         df.groupBy("level")
         .agg(
-            count("*").alias("log_count")
+            count("*").alias(
+                "log_count"
+            )
         )
     )
 
     analytics_df.show()
 
     # --------------------------------------------------
-    # 7. Calculate log percentages
+    # 7. Log percentages
     # --------------------------------------------------
 
     print(
@@ -273,14 +510,17 @@ def main():
             )
         )
 
-    percentage_df = percentage_df.orderBy(
-        col("log_count").desc()
+    percentage_df = (
+        percentage_df
+        .orderBy(
+            col("log_count").desc()
+        )
     )
 
     percentage_df.show()
 
     # --------------------------------------------------
-    # 8. Add processing timestamp
+    # 8. Processing timestamp
     # --------------------------------------------------
 
     print(
@@ -302,14 +542,17 @@ def main():
     analytics_df.show()
 
     # --------------------------------------------------
-    # 9. Write analytics data to MinIO
+    # 9. Write analytics to MinIO
     # --------------------------------------------------
 
     print(
-        "\n[9] Writing analytics data to MinIO..."
+        "\n[9] Writing analytics data "
+        "to MinIO..."
     )
 
-    analytics_path = get_analytics_path()
+    analytics_path = (
+        get_analytics_path()
+    )
 
     (
         analytics_df
@@ -325,11 +568,25 @@ def main():
     )
 
     # --------------------------------------------------
-    # 10. Stop Spark
+    # 10. Load events into PostgreSQL
+    # --------------------------------------------------
+
+    load_log_events(spark, df)
+
+    # --------------------------------------------------
+    # 11. Load summary into PostgreSQL
+    # --------------------------------------------------
+
+    load_log_level_summary(
+        analytics_df
+    )
+
+    # --------------------------------------------------
+    # 12. Stop Spark
     # --------------------------------------------------
 
     print(
-        "\n[10] Stopping Spark..."
+        "\n[12] Stopping Spark..."
     )
 
     spark.stop()
