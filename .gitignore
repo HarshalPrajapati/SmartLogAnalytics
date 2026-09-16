@@ -25,3 +25,9 @@ airflow/airflow.cfg
 # OS
 .DS_Store
 reports/
+
+# Generated reports
+reports/
+
+# Runtime logs
+logs/*.log
